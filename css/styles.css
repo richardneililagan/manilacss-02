@@ -1,0 +1,45 @@
+.flush-left {
+  text-align: left;
+}
+
+.flush-right {
+  text-align: right;
+}
+
+/* --- */
+
+.accent {
+  transition: color 2s linear;
+}
+
+.present .accent {
+  color: goldenrod;
+}
+
+.past .accent,
+.future .accent {
+  color: unset;
+}
+
+/* --- */
+
+.footnote {
+  font-size: .8em !important;
+  margin-top: 1.6em !important;
+}
+
+.footnote.flush-left {
+  margin-left: 1.4em !important;
+}
+
+/* --- */
+
+.small {
+  font-size: 0.6em !important;
+}
+
+/* --- */
+
+table thead {
+  color: goldenrod;
+}
