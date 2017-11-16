@@ -252,6 +252,10 @@ npm install -g critical
 cat index.html | critical --inline > index.critical.html
 ```
 
+-
+
+<img data-src="assets/ungeek-critical.png">
+
 ---
 
 ## Why wouldn't I want to do this?
