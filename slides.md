@@ -44,38 +44,6 @@ Assuming a PHP 5000 / day margin:
 
 ---
 
-> Amazon potentially loses <span class="accent">USD 1.6 billion</span>
-> if their pages loaded one second slower.
-
-Amazon <!-- .element class="footnote" -->
-
-note:
-
-### Amazon 2016
-
-- Revenue is USD 136 billion (1.1%)
-- Profit is USD 47.7 billion (3.35%)
-
--
-
-> Traffic to Yahoo! pages could <span class="accent">increase by 9%</span>
-> if they could reduce page load times by <span class="accent">0.4 seconds</span>.
-
-Yahoo <!-- .element class="footnote" -->
-
--
-
-> A reduction of <span class="accent">2.2 seconds</span> in page load times
-> can increase downloads by <span class="accent">15.4%</span>.
-
-Mozilla <!-- .element class="footnote" -->
-
----
-
-How does all this relate to me, <br/> as a CSS developer?
-
----
-
 ### Page load "speed"
 
 | Metrics |
@@ -93,7 +61,7 @@ How does all this relate to me, <br/> as a CSS developer?
 ## Time to Render
 
 <blockquote class="fragment">
-Relates to the amount of time it takes until a page is fully rendered.
+How long does it take for the page to be fully rendered?
 </blockquote>
 
 -
@@ -102,13 +70,38 @@ Relates to the amount of time it takes until a page is fully rendered.
 
 ---
 
-Problem #1:
+## The critical render path
+
+1. Request for HTML payload
+2. Parse HTML payload and identify assets
+3. Determine and download critical assets
+4. Create / update the document render tree
+5. Perform render
+
+note:
+
+We're most interested in optimizing (3).
+
+-
+
+| Optimizing our critical path |
+|:---:|
+| Minimize the payload size of the critical path |
+| Minimize the amount of critical resources |
+
+note:
+
+How does this relate to me, as a CSS developer?
+
+---
+
+Consideration #1:
 
 ### External CSS files generally block rendering.
 
 -
 
-```
+```html
 <!doctype html>
 <html>
 <head>
@@ -127,6 +120,15 @@ note:
 
 -
 
+```css
+@import 'utility.css';
+...
+```
+
+-
+
+Load the CSS files asynchronously instead?
+
 ```javascript
 function loadCssAsync (url) {
   // 1. request for CSS file using XHR
@@ -141,7 +143,7 @@ loadCssAsync('//styles.css')
 ```
 ---
 
-Problem #2:
+Consideration #2:
 
 ### We generally want CSS files to block rendering.
 
@@ -170,7 +172,7 @@ note:
 
 ---
 
-Problem #3:
+Consideration #3:
 
 ### Inlining styles bloat up the whole page lifecycle
 
@@ -180,7 +182,114 @@ Problem #3:
 
 - Caching benefits are virtually eliminated completely <!-- .element: class="fragment" -->
 - The whole "stylesheet" is downloaded again on every page load <!-- .element: class="fragment" -->
+- Potentially a pain in the derrière to maintain <!-- .element: class="fragment" -->
 
 ---
 
-## Recap
+# So, yeah.
+
+-
+
+| Optimizing our critical path |
+|:---:|
+| Minimize the payload size of the critical path |
+| Minimize the amount of critical resources |
+
+---
+
+Attack #1:
+
+## <span class="accent">Combine</span><br> related stylesheets together.
+
+note:
+
+- minimizes total file size due to redundant checking
+- minimizes network overhead
+  - time and size component
+
+---
+
+Attack #2:
+
+## <span class="accent">Properly qualify</span> stylesheets
+
+-
+
+<span class="accent">Remember:</span> The browser tries to determine which assets are critical to rendering.
+
+```html
+<link rel="stylesheet" href="a.css">
+<link rel="stylesheet" href="a.css" media="orientation:portrait">
+<link rel="stylesheet" href="a.css" media="(min-width: 600px)">
+<link rel="stylesheet" href="a.css" media="print">
+```
+
+---
+
+Attack #3:
+
+## <span class="accent">Inline</span> critical styles
+
+and defer the others.
+
+-
+
+<img data-src="assets/medium-critical.png">
+
+-
+
+<img data-src="assets/npm-critical.png">
+
+-
+
+> https://npmjs.com/package/critical
+
+```bash
+# :: I use it as a CLI tool
+
+npm install -g critical
+
+cat index.html | critical --inline > index.critical.html
+```
+
+---
+
+## Why wouldn't I want to do this?
+
+-
+
+It can get really tedious.
+
+-
+
+You _still_ lose caching benefits.
+
+-
+
+You forego optimizations that happen on-demand.
+
+note:
+
+see discussion on browsers determining what critical assets are
+
+-
+
+HTTP/2 deprecates a lot of the workarounds we've described above.
+
+-
+
+Don't even get me started on SPAs.
+
+---
+
+## General recommendations
+
+1. Inline anything below 1 KB.
+2. Don't inline anything that is _not_ relevant above the fold.
+3. Ensure you're properly scoping your stylesheets.
+
+---
+
+### Thanks for listening.
+
+If you have questions, feel free to approach me anytime after the talk as well.
